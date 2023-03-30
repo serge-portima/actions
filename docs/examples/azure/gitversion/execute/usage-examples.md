@@ -79,7 +79,7 @@ The Execute GitVersion task creates the following job-scoped variables and multi
 - uncommittedChanges (since 5.5.0)
 - commitDate
 
-The outputs can be accessed using the syntax `$(<id>.<outputName>)` or `$(<id>.GitVersion_<OutputName>)`, where `<id>` is the ID assigned to the step that calls the action, by subsequent steps later in the same job.  See example [5](#example-5).
+The outputs can be accessed using the syntax `$(<id>.<outputName>)` or `$(<id>.GitVersion.<OutputName>)`, where `<id>` is the ID assigned to the step that calls the action, by subsequent steps later in the same job.  See example [5](#example-5).
 
 The action also creates environment variables of the form `$(<outputName>)` or `$(GitVersion_<OutputName>)` for use by other steps in the same job.  See example [6](#example-6).
 
@@ -346,7 +346,7 @@ jobs:
         name: Version # the step MUST be named to access its output variables in another job.
 
   - job: CreateReleaseNotes
-    condition: and(succeeded(), eq(dependencies.CalculateVersion.outputs['Version.GitVersion_BranchName'], 'main'))
+    condition: and(succeeded(), eq(dependencies.CalculateVersion.outputs['Version.GitVersion.BranchName'], 'main'))
     dependsOn: CalculateVersion
 ```
 
@@ -367,7 +367,7 @@ jobs:
 
   - job: BuildAndPack
     variables:
-      Ver.MajorMinorPatch: $[ dependencies.CalculateVersion.outputs['Version.GitVersion_MajorMinorPatch'] ]
+      Ver.MajorMinorPatch: $[ dependencies.CalculateVersion.outputs['Version.GitVersion.MajorMinorPatch'] ]
 ```
 
 ### Example 9
@@ -388,7 +388,7 @@ stages:
             name: Version # the step MUST be named to access its output variables in another stage.
 
   - stage: S2
-    condition: and(succeeded(), gt(dependencies.S1.outputs['CalculateVersion.Version.GitVersion_Major'], 0))
+    condition: and(succeeded(), gt(dependencies.S1.outputs['CalculateVersion.Version.GitVersion.Major'], 0))
     dependsOn: S1
 ```
 
@@ -413,5 +413,5 @@ stages:
     jobs:
       - job: UpdateAssemblyVersions
         variables:
-          Ver.AssemblyVer: $[ stageDependencies.S1.CalculateVersion.outputs['Version.GitVersion_AssemblySemVer'] ] # Note the 'stageDependencies.<jobName>' syntax.
+          Ver.AssemblyVer: $[ stageDependencies.S1.CalculateVersion.outputs['Version.GitVersion.AssemblySemVer'] ] # Note the 'stageDependencies.<jobName>' syntax.
 ```
